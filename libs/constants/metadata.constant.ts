@@ -1,0 +1,1 @@
+export const RESPONSE_METADATA_KEY = 'response:class'
