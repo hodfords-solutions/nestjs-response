@@ -23,6 +23,7 @@
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
 # nestjs-response
+For response, use sync, not async.
 
 ## Installation 🤖
 
@@ -45,6 +46,12 @@ class UserController{
     getAllUser() {
         return [{name: "hello"}]
     }
+
+    @Get()
+    @ResponseModel(UserResponse, true, true)
+    getUser() {
+        return undefined
+    }
 }
 
 ```
@@ -62,6 +69,8 @@ class UserController{
 ```
 
 - `Interceptor decorator`
+
+This option is not recommended. Just use for microservice, let use global interceptor
 ```javascript
 @Controller('test')
 @UseResponseInterceptor()

@@ -1,0 +1,12 @@
+{
+    "version": "0.2",
+    "language": "en",
+    "words": [
+        "nestjs",
+        "hodfords",
+        "postbuild",
+        "metadatas"
+    ],
+    "flagWords": ["hte"],
+    "ignorePaths": ["node_modules", "*.spec.ts", "*.e2e-spec.ts", "cspell.json", "dist"]
+}
