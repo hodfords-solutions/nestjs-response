@@ -1,13 +1,16 @@
-import { NativeClassResponseNamesConstant } from './../constants/native-class-response-names.constant';
-import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
+import { CallHandler, ExecutionContext, Inject, Injectable, Logger, NestInterceptor } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
-import { validateSync, isBoolean } from 'class-validator';
-import { map, Observable } from 'rxjs';
+import { isBoolean, validateSync } from 'class-validator';
+import { NESTJS_RESPONSE_CONFIG_OPTIONS } from 'libs/constants/provider-key.constant';
+import { ConfigOption } from 'libs/types/config-option.type';
+import { Observable, map } from 'rxjs';
 import { RESPONSE_METADATA_KEY, RESPONSE_METADATA_KEYS } from '../constants/metadata.constant';
 import { ResponseValidateException } from '../exceptions/response-validate.exception';
-import { ResponseMetadata } from '../types/response-metadata.type';
 import { NativeValueResponse } from '../responses/native-value.response';
 import { HandleResult } from '../types/handle-result.type';
+import { ResponseMetadata } from '../types/response-metadata.type';
+import { NativeClassResponseNamesConstant } from './../constants/native-class-response-names.constant';
+import { ModuleRef } from '@nestjs/core';
 
 let Metadata = null;
 
@@ -21,9 +24,20 @@ try {
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
     private readonly logger = new Logger(ResponseInterceptor.name);
+    private configOption: ConfigOption;
+
+    constructor(private moduleRef: ModuleRef) {
+        this.configOption = this.moduleRef.get(NESTJS_RESPONSE_CONFIG_OPTIONS, { strict: false });
+    }
 
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-        return next.handle().pipe(map((data) => this.handleResponse(context, data)));
+        return next.handle().pipe(
+            map((data) => {
+                const res = this.handleResponse(context, data);
+
+                return this.excludeByKeys(res, this.configOption?.excludeKeys || []);
+            })
+        );
     }
 
     handleResponse(context: ExecutionContext, data: any) {
@@ -38,7 +52,29 @@ export class ResponseInterceptor implements NestInterceptor {
         return data;
     }
 
-    handleOneTypeResponse(context: ExecutionContext, data: any, responseMetadata: ResponseMetadata) {
+    private excludeByKeys(data: any, keys: string[]) {
+        for (const key of keys) {
+            data = this.excludeByKey(data, key);
+        }
+
+        return data;
+    }
+
+    private excludeByKey(data: any, key: string) {
+        for (const prop in data) {
+            if (typeof data[prop] === 'object') {
+                data[prop] = this.excludeByKey(data[prop], key);
+            } else if (Array.isArray(data[prop])) {
+                data[prop] = data[prop].map((item: any) => this.excludeByKey(item, key));
+            } else if (prop === key) {
+                delete data[prop];
+            }
+        }
+
+        return data;
+    }
+
+    private handleOneTypeResponse(context: ExecutionContext, data: any, responseMetadata: ResponseMetadata) {
         if (!isBoolean(data) && !data) {
             return this.handleEmptyResponse(responseMetadata, data);
         }
@@ -49,7 +85,7 @@ export class ResponseInterceptor implements NestInterceptor {
         return this.handleSingleResponse(responseMetadata, data);
     }
 
-    handleMultiTypeResponse(context: ExecutionContext, data: any, responseMetadatas: ResponseMetadata[]) {
+    private handleMultiTypeResponse(context: ExecutionContext, data: any, responseMetadatas: ResponseMetadata[]) {
         const results: HandleResult[] = [];
         const newMetadatas = this.filterResponseMetadatas(responseMetadatas, data);
         for (const metadata of newMetadatas) {
@@ -70,7 +106,7 @@ export class ResponseInterceptor implements NestInterceptor {
         throw new ResponseValidateException(errors);
     }
 
-    handleSingleResponse(responseMetadata: ResponseMetadata, data: any) {
+    private handleSingleResponse(responseMetadata: ResponseMetadata, data: any) {
         if (NativeClassResponseNamesConstant.includes(responseMetadata.responseClass.name)) {
             return this.handleNativeValueResponse(responseMetadata, data);
         }
@@ -86,7 +122,7 @@ export class ResponseInterceptor implements NestInterceptor {
         return plainToInstance(responseMetadata.responseClass, data);
     }
 
-    handleListResponse(context: ExecutionContext, responseMetadata: ResponseMetadata, data: any) {
+    private handleListResponse(context: ExecutionContext, responseMetadata: ResponseMetadata, data: any) {
         const newData: object[] = [];
         for (const item of data) {
             const newItem = this.handleSingleResponse(responseMetadata, item);
@@ -98,7 +134,7 @@ export class ResponseInterceptor implements NestInterceptor {
         return newData;
     }
 
-    handleEmptyResponse(responseMetadata: ResponseMetadata, data: any) {
+    private handleEmptyResponse(responseMetadata: ResponseMetadata, data: any) {
         if (responseMetadata.isAllowEmpty) {
             return data;
         } else {

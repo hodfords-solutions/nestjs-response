@@ -14,6 +14,13 @@ export class AppController {
         return { name: 'test' };
     }
 
+    @Get('exclude')
+    @ResponseModel(UserResponse, false, true)
+    @HttpCode(HttpStatus.OK)
+    getExclude() {
+        return { name: 'test', secret: 'secret' };
+    }
+
     @Get('undefined')
     @ResponseModel(UserResponse, false, true)
     @HttpCode(HttpStatus.OK)
