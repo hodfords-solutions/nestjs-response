@@ -35,7 +35,7 @@ export class ResponseInterceptor implements NestInterceptor {
             map((data) => {
                 const res = this.handleResponse(context, data);
 
-                return this.excludeByKeys(res, this.configOption?.excludeKeys || []);
+                return this.excludeByKeys(res, this.configOption?.excludedKeys || []);
             })
         );
     }

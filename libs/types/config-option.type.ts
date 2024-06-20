@@ -1,3 +1,3 @@
 export type ConfigOption = {
-    excludeKeys?: string[];
+    excludedKeys?: string[];
 };
