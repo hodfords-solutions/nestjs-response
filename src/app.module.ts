@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { ResponseModule } from '../libs/modules/response.module';
 
 const nestjsResponseConfig = ResponseModule.forRoot({
-    excludeKeys: ['secret']
+    excludedKeys: ['secret']
 });
 
 @Module({
