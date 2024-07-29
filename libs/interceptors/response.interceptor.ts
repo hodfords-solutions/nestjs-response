@@ -1,4 +1,4 @@
-import { CallHandler, ExecutionContext, Inject, Injectable, Logger, NestInterceptor } from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { isBoolean, validateSync } from 'class-validator';
 import { NESTJS_RESPONSE_CONFIG_OPTIONS } from 'libs/constants/provider-key.constant';
@@ -35,7 +35,7 @@ export class ResponseInterceptor implements NestInterceptor {
             map((data) => {
                 const res = this.handleResponse(context, data);
 
-                return this.excludeByKeys(res, this.configOption?.excludedKeys || []);
+                return this.excludeByKeys(context, res, this.configOption?.excludedKeys || []);
             })
         );
     }
@@ -52,7 +52,17 @@ export class ResponseInterceptor implements NestInterceptor {
         return data;
     }
 
-    private excludeByKeys(data: any, keys: string[]) {
+    private excludeByKeys(context: ExecutionContext, data: any, keys: string[]) {
+        /**
+         * Check if endpoint has response metadata, if not, then return data
+         */
+        if (
+            !Reflect.getMetadata(RESPONSE_METADATA_KEY, context.getHandler()) ||
+            !Reflect.getMetadata(RESPONSE_METADATA_KEYS, context.getHandler())
+        ) {
+            return data;
+        }
+
         for (const key of keys) {
             data = this.excludeByKey(data, key);
         }
