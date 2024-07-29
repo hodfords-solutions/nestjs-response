@@ -57,7 +57,7 @@ export class ResponseInterceptor implements NestInterceptor {
          * Check if endpoint has response metadata, if not, then return data
          */
         if (
-            !Reflect.getMetadata(RESPONSE_METADATA_KEY, context.getHandler()) ||
+            !Reflect.getMetadata(RESPONSE_METADATA_KEY, context.getHandler()) &&
             !Reflect.getMetadata(RESPONSE_METADATA_KEYS, context.getHandler())
         ) {
             return data;
