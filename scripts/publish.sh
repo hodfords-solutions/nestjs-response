@@ -4,5 +4,5 @@ npm view @hodfords/nestjs-response@"$(node -p "require('./package.json').version
 npm install
 npm run build
 cp README.md dist
-cd dist
+cd dist/libs
 npm publish --access public
