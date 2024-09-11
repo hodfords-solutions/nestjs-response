@@ -1,38 +1,64 @@
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
+  <a href="http://opensource.hodfords.uk" target="blank"><img src="https://opensource.hodfords.uk/img/logo.svg" width="320" alt="Nest Logo" /></a>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
+<p align="center">
+Nestjs-Response is a simple yet powerful library for managing API responses in a NestJS application. It provides decorators to handle response models, allowing easy integration with Swagger for API documentation and validation.
 </p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-# nestjs-response
-For response, use sync, not async.
 
 ## Installation 🤖
-
+To begin using it, we first install the required dependencies.
 ```
-npm install @hodfords/nestjs-response --save
-
+npm install @hodfords/nestjs-response
 ```
+
+## Interceptor Setup 🚀
+- `Global Interceptor (Recommended):`
+
+Global interceptors are applied across the entire application. To set up a global interceptor, you can register it in the providers array in your module.
 
 ```typescript
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { ResponseInterceptor } from '@hodfords/nestjs-response';
+
+@Module({
+	providers: [
+		{
+			provide: APP_INTERCEPTOR,
+			useClass: ResponseInterceptor
+		}
+	]
+})
+export class AppModule {}
+```
+
+- `Interceptor with Decorator:`
+
+For microservices or specific scenarios, use the @UseInterceptors decorator to apply interceptors at the controller or method level. However, it's generally recommended to use global interceptors.
+
+
+
+```typescript
+@Controller()
+@UseResponseInterceptor()
+export class AppController {}
+```
+
+## Usage 🚀
+`@ResponseModel()`
+
+Use the @ResponseModel decorator when an API return single response type.
+
+Parameter:
+- `responseClass`: The class that defines the response model.
+- `isArray` (optional): Set to `true` if the response is an array of `responseClass`. Defaults to `false`.
+- `isAllowEmpty` (optional): Set to true if the response can be empty. Defaults to `false`.
+
+Example of usage:
+
+```typescript
+import { ResponseModel } from '@hodfords/nestjs-response';
+
 class UserResponse {
     @ApiProperty()
     @IsNotEmpty()
@@ -40,41 +66,81 @@ class UserResponse {
     name: string
 }
 
-class UserController{
+export class UserController {
     @Get()
     @ResponseModel(UserResponse, true)
     getAllUser() {
-        return [{name: "hello"}]
+        return [{ name: "John" }]
     }
+}
 
+```
+
+`@ResponseModels()`
+
+Use the @ResponseModels decorator when an API might return multiple response types.
+
+Parameter:
+- `...responseClasses`: A list of response classes or arrays of response classes.
+
+Example of usage:
+```typescript
+import { ResponseModel } from '@hodfords/nestjs-response';
+
+class AppController {
+	@Get('list-models/:type')
+	@ResponseModels(Number, [Number], UserPaginationResponse, [UserResponse], undefined, null)
+	getModels(@Param('type') type: string) {
+		if (type == 'undefined') {
+			return undefined;
+		}
+		if (type == 'pagination') {
+			return {
+				items: [{ name: 'John' }, { name: 'Daniel' }],
+					total: 2,
+					lastPage: 1,
+					perPage: 1,
+					currentPage: 1
+				};
+			}
+		if (type == 'multiple') {
+			return [{ name: 'John' }, { name: 'Daniel' }];
+		}
+		if (type == 'list-number') {
+			return [123, 456];
+		}
+		if (type == 'number') {
+			return 456;
+		}
+		return null;
+	}
+}
+
+```
+
+### Exception Handling
+
+When the response data does not match the expected model, a validation exception will be raised. This ensures that the API returns data conforming to the defined structure.
+
+Example Case: If a property is expected to be a string, but a number is returned, a validation error will occur.
+
+```typescript
+class UserResponse {
+    @ApiProperty()
+    @IsString()
+    name: string;
+}
+
+export class UserController {
     @Get()
-    @ResponseModel(UserResponse, true, true)
+    @ResponseModel(UserResponse)
     getUser() {
-        return undefined
+        return { name: 123 }  // Error: name must be a number ...
     }
 }
 
 ```
 
-- `Interceptor global`
-```javascript
-{
-    providers: [
-        {
-            provide: APP_INTERCEPTOR,
-            useClass: LoggingInterceptor
-        }
-    ]
-}
-```
 
-- `Interceptor decorator`
-
-This option is not recommended. Just use for microservice, let use global interceptor
-```javascript
-@Controller('test')
-@UseResponseInterceptor()
-export class TestController {
-    
-}
-```
+## License
+This project is licensed under the MIT License
