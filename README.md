@@ -7,12 +7,15 @@ Nestjs-Response is a simple yet powerful library for managing API responses in a
 </p>
 
 ## Installation 🤖
+
 To begin using it, we first install the required dependencies.
+
 ```
 npm install @hodfords/nestjs-response
 ```
 
 ## Interceptor Setup 🚀
+
 - `Global Interceptor (Recommended):`
 
 Global interceptors are applied across the entire application. To set up a global interceptor, you can register it in the providers array in your module.
@@ -22,12 +25,12 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseInterceptor } from '@hodfords/nestjs-response';
 
 @Module({
-	providers: [
-		{
-			provide: APP_INTERCEPTOR,
-			useClass: ResponseInterceptor
-		}
-	]
+    providers: [
+        {
+            provide: APP_INTERCEPTOR,
+            useClass: ResponseInterceptor
+        }
+    ]
 })
 export class AppModule {}
 ```
@@ -36,8 +39,6 @@ export class AppModule {}
 
 For microservices or specific scenarios, use the @UseInterceptors decorator to apply interceptors at the controller or method level. However, it's generally recommended to use global interceptors.
 
-
-
 ```typescript
 @Controller()
 @UseResponseInterceptor()
@@ -45,11 +46,13 @@ export class AppController {}
 ```
 
 ## Usage 🚀
+
 `@ResponseModel()`
 
 Use the @ResponseModel decorator when an API return single response type.
 
 Parameter:
+
 - `responseClass`: The class that defines the response model.
 - `isArray` (optional): Set to `true` if the response is an array of `responseClass`. Defaults to `false`.
 - `isAllowEmpty` (optional): Set to true if the response can be empty. Defaults to `false`.
@@ -81,39 +84,41 @@ export class UserController {
 Use the @ResponseModels decorator when an API might return multiple response types.
 
 Parameter:
+
 - `...responseClasses`: A list of response classes or arrays of response classes.
 
 Example of usage:
+
 ```typescript
 import { ResponseModel } from '@hodfords/nestjs-response';
 
 class AppController {
-	@Get('list-models/:type')
-	@ResponseModels(Number, [Number], UserPaginationResponse, [UserResponse], undefined, null)
-	getModels(@Param('type') type: string) {
-		if (type == 'undefined') {
-			return undefined;
-		}
-		if (type == 'pagination') {
-			return {
-				items: [{ name: 'John' }, { name: 'Daniel' }],
-					total: 2,
-					lastPage: 1,
-					perPage: 1,
-					currentPage: 1
-				};
-			}
-		if (type == 'multiple') {
-			return [{ name: 'John' }, { name: 'Daniel' }];
-		}
-		if (type == 'list-number') {
-			return [123, 456];
-		}
-		if (type == 'number') {
-			return 456;
-		}
-		return null;
-	}
+    @Get('list-models/:type')
+    @ResponseModels(Number, [Number], UserPaginationResponse, [UserResponse], undefined, null)
+    getModels(@Param('type') type: string) {
+        if (type == 'undefined') {
+            return undefined;
+        }
+        if (type == 'pagination') {
+            return {
+                items: [{ name: 'John' }, { name: 'Daniel' }],
+                total: 2,
+                lastPage: 1,
+                perPage: 10,
+                currentPage: 1
+            };
+        }
+        if (type == 'multiple') {
+            return [{ name: 'John' }, { name: 'Daniel' }];
+        }
+        if (type == 'list-number') {
+            return [123, 456];
+        }
+        if (type == 'number') {
+            return 456;
+        }
+        return null;
+    }
 }
 
 ```
@@ -141,6 +146,6 @@ export class UserController {
 
 ```
 
-
 ## License
+
 This project is licensed under the MIT License
