@@ -40,6 +40,9 @@ export class AppModule {}
 For microservices or specific scenarios, use the @UseInterceptors decorator to apply interceptors at the controller or method level. However, it's generally recommended to use global interceptors.
 
 ```typescript
+import { Controller } from '@nestjs/common';
+import { UseResponseInterceptor } from '@hodfords/nestjs-response';
+
 @Controller()
 @UseResponseInterceptor()
 export class AppController {}
@@ -61,22 +64,22 @@ Example of usage:
 
 ```typescript
 import { ResponseModel } from '@hodfords/nestjs-response';
+import { Get } from '@nestjs/common';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 class UserResponse {
-    @ApiProperty()
     @IsNotEmpty()
     @IsString()
-    name: string
+    name: string;
 }
 
 export class UserController {
     @Get()
     @ResponseModel(UserResponse, true)
     getAllUser() {
-        return [{ name: "John" }]
+        return [{ name: 'John' }];
     }
 }
-
 ```
 
 `@ResponseModels()`
@@ -90,9 +93,13 @@ Parameter:
 Example of usage:
 
 ```typescript
-import { ResponseModel } from '@hodfords/nestjs-response';
+import { ResponseModels } from '@hodfords/nestjs-response';
+import { Controller, Get, Param } from '@nestjs/common';
+import { UserResponse } from './responses/user.response';
+import { UserPaginationResponse } from './responses/user-pagination.response';
 
-class AppController {
+@Controller()
+export class AppController {
     @Get('list-models/:type')
     @ResponseModels(Number, [Number], UserPaginationResponse, [UserResponse], undefined, null)
     getModels(@Param('type') type: string) {
@@ -130,8 +137,11 @@ When the response data does not match the expected model, a validation exception
 Example Case: If a property is expected to be a string, but a number is returned, a validation error will occur.
 
 ```typescript
+import { ResponseModel } from '@hodfords/nestjs-response';
+import { Get } from '@nestjs/common';
+import { IsString } from 'class-validator';
+
 class UserResponse {
-    @ApiProperty()
     @IsString()
     name: string;
 }
@@ -140,7 +150,7 @@ export class UserController {
     @Get()
     @ResponseModel(UserResponse)
     getUser() {
-        return { name: 123 }  // Error: name must be a number ...
+        return { name: 123 }; // Error: name must be a number ...
     }
 }
 
