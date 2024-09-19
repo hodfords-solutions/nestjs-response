@@ -1,8 +1,9 @@
 import { Controller, Get, HttpCode, HttpStatus, Param } from '@nestjs/common';
-import { UseResponseInterceptor, ResponseModel } from '@hodfords/nestjs-response';
+import { UseResponseInterceptor, ResponseModel } from 'lib';
 import { UserResponse } from './responses/user.response';
 import { UserPaginationResponse } from './responses/user-pagination.response';
-import { ResponseModels } from '../libs/decorators/response-models.decorator';
+import { ResponseModels } from '../lib/decorators/response-models.decorator';
+import { PaginationResponse } from './responses/pagination.response';
 
 @Controller()
 @UseResponseInterceptor()
@@ -10,35 +11,35 @@ export class AppController {
     @Get()
     @ResponseModel(UserResponse)
     @HttpCode(HttpStatus.OK)
-    getSingle() {
+    getSingle(): { name: string } {
         return { name: 'test' };
     }
 
     @Get('exclude')
     @ResponseModel(UserResponse, false, true)
     @HttpCode(HttpStatus.OK)
-    getExclude() {
-        return { name: 'test', secret: 'secret' };
+    getExclude(): UserResponse {
+        return { name: 'test', secretKey: 'secret' };
     }
 
     @Get('undefined')
     @ResponseModel(UserResponse, false, true)
     @HttpCode(HttpStatus.OK)
-    getUndefined() {
+    getUndefined(): undefined {
         return undefined;
     }
 
     @Get('multiple')
     @ResponseModel(UserResponse, true)
     @HttpCode(HttpStatus.OK)
-    getMultiple() {
+    getMultiple(): UserResponse[] {
         return [{ name: 'test' }, { name: 'test2' }];
     }
 
     @Get('pagination')
     @ResponseModel(UserPaginationResponse, false)
     @HttpCode(HttpStatus.OK)
-    getPagination() {
+    getPagination(): PaginationResponse {
         return {
             items: [{ name: 'test' }, { name: 'test2' }],
             total: 10,
@@ -50,43 +51,45 @@ export class AppController {
 
     @Get('boolean')
     @ResponseModel(Boolean, false)
-    getBoolean() {
+    getBoolean(): boolean {
         return false;
     }
 
     @Get('list-boolean')
     @ResponseModel(Boolean, true)
-    getListBooleans() {
+    getListBooleans(): boolean[] {
         return [false, true, false, true, true];
     }
 
     @Get('string')
     @ResponseModel(String, false)
-    getString() {
+    getString(): string {
         return 'foo';
     }
 
     @Get('list-string')
     @ResponseModel(String, true)
-    getListString() {
+    getListString(): string[] {
         return ['foo', 'bar'];
     }
 
     @Get('number')
     @ResponseModel(Number, false)
-    getNumber() {
+    getNumber(): number {
         return 123;
     }
 
     @Get('list-number')
     @ResponseModel(Number, true)
-    getListNumber() {
+    getListNumber(): number[] {
         return [123, 456];
     }
 
     @Get('list-models/:type')
     @ResponseModels(Number, [Number], UserPaginationResponse, [UserResponse], undefined, null)
-    getModels(@Param('type') type: string) {
+    getModels(
+        @Param('type') type: string
+    ): number | number[] | UserPaginationResponse | UserResponse[] | undefined | null {
         if (type == 'undefined') {
             return undefined;
         }

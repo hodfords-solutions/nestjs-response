@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber } from 'class-validator';
 
 export abstract class PaginationResponse {
-    abstract items: any[];
+    abstract items: object[];
 
     @ApiProperty()
     @IsNumber()
