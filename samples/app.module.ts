@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { ResponseModule } from '../libs/modules/response.module';
+import { ResponseModule } from '../lib/modules/response.module';
 
 const nestjsResponseConfig = ResponseModule.forRoot({
     excludedKeys: ['secret']
