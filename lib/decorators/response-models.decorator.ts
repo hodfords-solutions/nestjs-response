@@ -1,4 +1,4 @@
-import { ResponseClass } from './../types/response-metadata.type';
+import { ResponseClass } from '../types/response-metadata.type';
 import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiExtraModels, ApiOkResponse, refs } from '@nestjs/swagger';
 import { RESPONSE_METADATA_KEYS } from '../constants/metadata.constant';
