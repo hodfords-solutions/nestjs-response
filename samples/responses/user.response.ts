@@ -9,5 +9,5 @@ export class UserResponse {
     @ApiProperty()
     @IsString()
     @IsOptional()
-    secretKey: string;
+    secretKey?: string;
 }
