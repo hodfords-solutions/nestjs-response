@@ -12,12 +12,12 @@
     "prebuild": "rimraf dist",
     "build": "nest build",
     "postbuild": "cp package.json dist/lib",
-    "format": "prettier --write \"samples/**/*.ts\" \"test/**/*.ts\" \"lib/**/*.ts\"",
+    "format": "prettier --write \"sample/**/*.ts\" \"test/**/*.ts\" \"lib/**/*.ts\"",
     "start": "nest start",
     "start:dev": "npm run prebuild && nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "lint": "eslint \"{samples,apps,lib,test}/**/*.ts\" --fix",
+    "lint": "eslint \"{sample,apps,lib,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -83,11 +83,11 @@
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
     "roots": [
-      "<rootDir>/samples/",
+      "<rootDir>/sample/",
       "<rootDir>/lib/"
     ],
     "moduleNameMapper": {
-      "^@hodfords/nestjs-response(|/.*)$": "<rootDir>/lib/nestjs-response/samples/$1"
+      "^@hodfords/nestjs-response(|/.*)$": "<rootDir>/lib/nestjs-response/sample/$1"
     }
   }
 }
