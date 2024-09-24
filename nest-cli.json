@@ -1,6 +1,6 @@
 {
   "collection": "@nestjs/schematics",
-  "sourceRoot": "samples",
+  "sourceRoot": "sample",
   "projects": {
     "nestjs-response": {
       "type": "library",
