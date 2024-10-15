@@ -139,7 +139,7 @@ export class ResponseInterceptor implements NestInterceptor {
         if (errors.length) {
             throw new ResponseValidateException(errors);
         }
-        return plainToInstance(responseMetadata.responseClass, data);
+        return newData;
     }
 
     private handleListResponse(
@@ -184,7 +184,7 @@ export class ResponseInterceptor implements NestInterceptor {
         if (errors.length) {
             throw new ResponseValidateException(errors);
         }
-        return data;
+        return newData;
     }
 
     private getResponseMap(responseMetadata: ResponseMetadata, data: object): Record<string, object> {
