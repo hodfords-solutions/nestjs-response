@@ -11,6 +11,7 @@ import { HandleResult } from '../types/handle-result.type';
 import { ResponseMetadata } from '../types/response-metadata.type';
 import { NativeClassResponseNamesConstant } from '../constants/native-class-response-names.constant';
 import { ModuleRef } from '@nestjs/core';
+import { NativeResponseValueType } from '../types/native-response-value.type';
 
 let grpcMetadataClass = null;
 
@@ -174,7 +175,7 @@ export class ResponseInterceptor implements NestInterceptor {
         }
     }
 
-    private handleNativeValueResponse(responseMetadata: ResponseMetadata, data: object): object {
+    private handleNativeValueResponse(responseMetadata: ResponseMetadata, data: object): any {
         const responseMap = this.getResponseMap(responseMetadata, data);
         const newData = plainToInstance(NativeValueResponse, responseMap);
         const errors = validateSync(newData, {
@@ -184,7 +185,23 @@ export class ResponseInterceptor implements NestInterceptor {
         if (errors.length) {
             throw new ResponseValidateException(errors);
         }
-        return newData;
+        return this.getNativeResponseValue(responseMetadata, newData);
+    }
+
+    private getNativeResponseValue(
+        responseMetadata: ResponseMetadata,
+        data: NativeValueResponse
+    ): NativeResponseValueType {
+        switch (responseMetadata.responseClass.name) {
+            case 'Boolean':
+                return data['boolean'];
+            case 'String':
+                return data['string'];
+            case 'Number':
+                return data['number'];
+            default:
+                return null;
+        }
     }
 
     private getResponseMap(responseMetadata: ResponseMetadata, data: object): Record<string, object> {

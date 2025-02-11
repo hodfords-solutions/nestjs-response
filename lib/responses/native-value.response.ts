@@ -3,13 +3,13 @@ import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 export class NativeValueResponse {
     @IsOptional()
     @IsString()
-    string: string;
+    string?: string;
 
     @IsOptional()
     @IsNumber()
-    number: number;
+    number?: number;
 
     @IsOptional()
     @IsBoolean()
-    boolean: boolean;
+    boolean?: boolean;
 }
