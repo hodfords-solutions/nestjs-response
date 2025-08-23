@@ -99,6 +99,14 @@ export class ResponseInterceptor implements NestInterceptor {
             return this.handleListResponse(context, responseMetadata, data as object[]);
         }
 
+        if (
+            NativeClassResponseNamesConstant.includes(responseMetadata.constructor.name) &&
+            grpcMetadataClass &&
+            context.switchToRpc().getContext() instanceof grpcMetadataClass
+        ) {
+            return { value: this.handleNativeValueResponse(responseMetadata, data), grpcNative: true };
+        }
+
         return this.handleSingleResponse(responseMetadata, data);
     }
 
