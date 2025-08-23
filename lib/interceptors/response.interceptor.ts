@@ -100,7 +100,7 @@ export class ResponseInterceptor implements NestInterceptor {
         }
 
         if (
-            NativeClassResponseNamesConstant.includes(responseMetadata.constructor.name) &&
+            NativeClassResponseNamesConstant.includes(responseMetadata.responseClass.name) &&
             grpcMetadataClass &&
             context.switchToRpc().getContext() instanceof grpcMetadataClass
         ) {
