@@ -135,14 +135,16 @@ export class ResponseInterceptor implements NestInterceptor {
         throw new ResponseValidateException(errors);
     }
 
-    private handleSingleResponse(responseMetadata: ResponseMetadata, data: object): object {
+    private handleSingleResponse(context: ExecutionContext, responseMetadata: ResponseMetadata, data: object): object {
         if (NativeClassResponseNamesConstant.includes(responseMetadata.responseClass.name)) {
             return this.handleNativeValueResponse(responseMetadata, data);
         }
+        let options = {};
+        if (context.switchToRpc().getContext() instanceof grpcMetadataClass) {
+            options = { groups: ['__sendData', '__grpc'] };
+        }
 
-        const newData = plainToInstance(responseMetadata.responseClass, data, {
-            groups: ['__sendData']
-        });
+        const newData = plainToInstance(responseMetadata.responseClass, data, options);
         const errors = validateSync(newData, {
             whitelist: true,
             stopAtFirstError: true
@@ -160,7 +162,7 @@ export class ResponseInterceptor implements NestInterceptor {
     ): object[] | { items: object[]; grpcArray: boolean } {
         const newData: object[] = [];
         for (const item of data) {
-            const newItem = this.handleSingleResponse(responseMetadata, item);
+            const newItem = this.handleSingleResponse(context, responseMetadata, item);
             newData.push(newItem);
         }
         if (grpcMetadataClass && context.switchToRpc().getContext() instanceof grpcMetadataClass) {
