@@ -140,7 +140,9 @@ export class ResponseInterceptor implements NestInterceptor {
             return this.handleNativeValueResponse(responseMetadata, data);
         }
 
-        const newData = plainToInstance(responseMetadata.responseClass, data);
+        const newData = plainToInstance(responseMetadata.responseClass, data, {
+            groups: ['__sendData']
+        });
         const errors = validateSync(newData, {
             whitelist: true,
             stopAtFirstError: true
