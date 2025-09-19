@@ -107,7 +107,7 @@ export class ResponseInterceptor implements NestInterceptor {
             return { value: this.handleNativeValueResponse(responseMetadata, data), grpcNative: true };
         }
 
-        return this.handleSingleResponse(responseMetadata, data);
+        return this.handleSingleResponse(context, responseMetadata, data);
     }
 
     private handleMultiTypeResponse(
