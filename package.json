@@ -1,6 +1,6 @@
 {
   "name": "@hodfords/nestjs-response",
-  "version": "11.0.6",
+  "version": "11.0.7",
   "description": "Standardizes and validates API responses in NestJS for consistent and reliable communication",
   "author": "",
   "license": "UNLICENSED",

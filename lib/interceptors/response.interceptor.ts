@@ -92,7 +92,7 @@ export class ResponseInterceptor implements NestInterceptor {
         data: object | object[],
         responseMetadata: ResponseMetadata
     ): object {
-        if (!isBoolean(data) && !data) {
+        if (!isBoolean(data) && (data === null || data === undefined)) {
             return this.handleEmptyResponse(responseMetadata, data);
         }
         if (responseMetadata.isArray) {
@@ -233,7 +233,7 @@ export class ResponseInterceptor implements NestInterceptor {
         if (Array.isArray(data)) {
             return this.getArrayTypeMetadata(responseMetadatas, data);
         }
-        if (!isBoolean(data) && !data) {
+        if (!isBoolean(data) && (data === null || data === undefined)) {
             return this.getEmptyTypeMetadata(responseMetadatas, data);
         }
         return this.getObjectTypeMetadata(responseMetadatas, data);
