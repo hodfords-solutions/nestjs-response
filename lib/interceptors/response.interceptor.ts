@@ -12,7 +12,6 @@ import { ResponseMetadata } from '../types/response-metadata.type';
 import { NativeClassResponseNamesConstant } from '../constants/native-class-response-names.constant';
 import { ModuleRef } from '@nestjs/core';
 import { NativeResponseValueType } from '../types/native-response-value.type';
-import { NullableGrpcClassResponseNamePrefix } from 'lib/constants/nullable-grpc-class-response-names.constant';
 
 let grpcMetadataClass = null;
 
