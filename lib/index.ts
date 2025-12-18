@@ -1,4 +1,5 @@
 export * from './constants/metadata.constant';
+export * from './constants/nullable-grpc-class-response-names.constant';
 export * from './decorators/response-model.decorator';
 export * from './decorators/use-response-interceptor.decorator';
 export * from './exceptions/response-validate.exception';
