@@ -12,6 +12,7 @@ import { ResponseMetadata } from '../types/response-metadata.type';
 import { NativeClassResponseNamesConstant } from '../constants/native-class-response-names.constant';
 import { ModuleRef } from '@nestjs/core';
 import { NativeResponseValueType } from '../types/native-response-value.type';
+import { NullableGrpcClassResponseNamePrefix } from 'lib/constants/nullable-grpc-class-response-names.constant';
 
 let grpcMetadataClass = null;
 
@@ -93,12 +94,10 @@ export class ResponseInterceptor implements NestInterceptor {
         responseMetadata: ResponseMetadata
     ): object {
         if (!isBoolean(data) && (data === null || data === undefined)) {
-            const emptyResult = this.handleEmptyResponse(responseMetadata, data);
-            return responseMetadata.isGrpcNullable ? { value: emptyResult, nullableGrpcResponse: true } : emptyResult;
+            return this.handleEmptyResponse(responseMetadata, data);
         }
         if (responseMetadata.isArray) {
-            const listResult = this.handleListResponse(context, responseMetadata, data as object[]);
-            return responseMetadata.isGrpcNullable ? { value: listResult, nullableGrpcResponse: true } : listResult;
+            return this.handleListResponse(context, responseMetadata, data as object[]);
         }
 
         if (
@@ -109,8 +108,7 @@ export class ResponseInterceptor implements NestInterceptor {
             return { value: this.handleNativeValueResponse(responseMetadata, data), grpcNative: true };
         }
 
-        const singleResult = this.handleSingleResponse(context, responseMetadata, data);
-        return responseMetadata.isGrpcNullable ? { value: singleResult, nullableGrpcResponse: true } : singleResult;
+        return this.handleSingleResponse(context, responseMetadata, data);
     }
 
     private handleMultiTypeResponse(
@@ -122,7 +120,15 @@ export class ResponseInterceptor implements NestInterceptor {
         const newMetadatas = this.filterResponseMetadatas(responseMetadatas, data);
         for (const metadata of newMetadatas) {
             try {
-                const result = this.handleOneTypeResponse(context, data, metadata);
+                let result = this.handleOneTypeResponse(context, data, metadata);
+                if (
+                    metadata.isAllowEmpty &&
+                    grpcMetadataClass &&
+                    context.switchToRpc().getContext() instanceof grpcMetadataClass
+                ) {
+                    result = { value: result, grpcNullable: true };
+                }
+
                 results.push({ data: result, error: null });
             } catch (error) {
                 const newError = error.errors ? error.errors : error;
