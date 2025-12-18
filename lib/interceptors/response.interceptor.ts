@@ -93,10 +93,12 @@ export class ResponseInterceptor implements NestInterceptor {
         responseMetadata: ResponseMetadata
     ): object {
         if (!isBoolean(data) && (data === null || data === undefined)) {
-            return this.handleEmptyResponse(responseMetadata, data);
+            const emptyResult = this.handleEmptyResponse(responseMetadata, data);
+            return responseMetadata.isGrpcNullable ? { value: emptyResult, nullableGrpcResponse: true } : emptyResult;
         }
         if (responseMetadata.isArray) {
-            return this.handleListResponse(context, responseMetadata, data as object[]);
+            const listResult = this.handleListResponse(context, responseMetadata, data as object[]);
+            return responseMetadata.isGrpcNullable ? { value: listResult, nullableGrpcResponse: true } : listResult;
         }
 
         if (
@@ -107,7 +109,8 @@ export class ResponseInterceptor implements NestInterceptor {
             return { value: this.handleNativeValueResponse(responseMetadata, data), grpcNative: true };
         }
 
-        return this.handleSingleResponse(context, responseMetadata, data);
+        const singleResult = this.handleSingleResponse(context, responseMetadata, data);
+        return responseMetadata.isGrpcNullable ? { value: singleResult, nullableGrpcResponse: true } : singleResult;
     }
 
     private handleMultiTypeResponse(
