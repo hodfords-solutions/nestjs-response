@@ -5,6 +5,7 @@ export type ResponseMetadata = {
     responseClass: ClassConstructor<object>;
     isArray: boolean;
     isAllowEmpty: boolean;
+    isGrpcNullable: boolean;
 };
 
 export type ResponseClass = Function | [Function];
