@@ -121,7 +121,11 @@ export class ResponseInterceptor implements NestInterceptor {
         for (const metadata of newMetadatas) {
             try {
                 let result = this.handleOneTypeResponse(context, data, metadata);
+                /**
+                 * NOTE: only handle grpc nullable for non-array type
+                 */
                 if (
+                    !metadata.isArray &&
                     metadata.isAllowEmpty &&
                     grpcMetadataClass &&
                     context.switchToRpc().getContext() instanceof grpcMetadataClass
