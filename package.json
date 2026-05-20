@@ -90,6 +90,10 @@
       "<rootDir>/sample/",
       "<rootDir>/lib/"
     ],
+    "moduleDirectories": [
+      "node_modules",
+      "<rootDir>"
+    ],
     "moduleNameMapper": {
       "@hodfords/nestjs-response(|/.*)$": "<rootDir>/lib/nestjs-response/sample/$1"
     }
