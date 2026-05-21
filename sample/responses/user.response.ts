@@ -1,5 +1,6 @@
 import { IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class UserResponse {
     @ApiProperty()
@@ -10,4 +11,12 @@ export class UserResponse {
     @IsString()
     @IsOptional()
     secretKey?: string;
+
+    @ApiProperty()
+    @IsString()
+    @IsOptional()
+    @Transform((object) => {
+        return object.value?.toUpperCase();
+    })
+    extra?: string;
 }

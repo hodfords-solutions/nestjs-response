@@ -11,6 +11,7 @@ import { ResponseMetadata } from '../types/response-metadata.type';
 import { NativeClassResponseNamesConstant } from '../constants/native-class-response-names.constant';
 import { ModuleRef } from '@nestjs/core';
 import { NativeResponseValueType } from '../types/native-response-value.type';
+import { applyTransforms } from '../utils/transform.util';
 
 let grpcMetadataClass = null;
 
@@ -94,6 +95,7 @@ export class ResponseInterceptor implements NestInterceptor {
         if (!isBoolean(data) && (data === null || data === undefined)) {
             return this.handleEmptyResponse(responseMetadata, data);
         }
+
         if (responseMetadata.isArray) {
             return this.handleListResponse(context, responseMetadata, data as object[]);
         }
@@ -151,6 +153,10 @@ export class ResponseInterceptor implements NestInterceptor {
             return this.handleNativeValueResponse(responseMetadata, data);
         }
 
+        // Apply only @Transform decorators in-place — skips full plainToInstance for performance.
+        applyTransforms(data, responseMetadata.responseClass, { groups: ['__getData'] });
+
+        // use validatePlainSync to increase performance, because we only need to validate the plain object, not transform it to class instance
         const errors = validatePlainSync(data, responseMetadata.responseClass, {
             whitelist: true,
             stopAtFirstError: true

@@ -8,3 +8,4 @@ export * from './types/response-metadata.type';
 export * from './decorators/response-models.decorator';
 export * from './types/handle-result.type';
 export * from './modules/response.module';
+export * from './utils/transform.util';

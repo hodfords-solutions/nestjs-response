@@ -33,7 +33,7 @@ export class AppController {
     @ResponseModel(UserResponse, true)
     @HttpCode(HttpStatus.OK)
     getMultiple(): any[] {
-        return [{ name: 'test' }, { name: 'test2', abc: 'xyz' }];
+        return [{ name: 'test' }, { name: 'test2', abc: 'xyz', secretKey: '456', extra: 'value' }];
     }
 
     @Get('pagination')
