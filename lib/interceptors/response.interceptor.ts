@@ -1,6 +1,5 @@
 import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
-import { plainToInstance } from 'class-transformer';
-import { isBoolean, validateSync } from 'class-validator';
+import { isBoolean, validatePlainSync } from 'class-validator';
 import { NESTJS_RESPONSE_CONFIG_OPTIONS } from 'lib/constants/provider-key.constant';
 import { ConfigOption } from 'lib/types/config-option.type';
 import { Observable, map } from 'rxjs';
@@ -151,20 +150,15 @@ export class ResponseInterceptor implements NestInterceptor {
         if (NativeClassResponseNamesConstant.includes(responseMetadata.responseClass.name)) {
             return this.handleNativeValueResponse(responseMetadata, data);
         }
-        let options = {};
-        if (context.switchToRpc().getContext() instanceof grpcMetadataClass) {
-            options = { groups: ['__sendData', '__grpc'] };
-        }
 
-        const newData = plainToInstance(responseMetadata.responseClass, data, options);
-        const errors = validateSync(newData, {
+        const errors = validatePlainSync(data, responseMetadata.responseClass, {
             whitelist: true,
             stopAtFirstError: true
         });
         if (errors.length) {
             throw new ResponseValidateException(errors);
         }
-        return newData;
+        return data;
     }
 
     private handleListResponse(
@@ -201,15 +195,14 @@ export class ResponseInterceptor implements NestInterceptor {
 
     private handleNativeValueResponse(responseMetadata: ResponseMetadata, data: object): any {
         const responseMap = this.getResponseMap(responseMetadata, data);
-        const newData = plainToInstance(NativeValueResponse, responseMap);
-        const errors = validateSync(newData, {
+        const errors = validatePlainSync(responseMap, NativeValueResponse, {
             whitelist: true,
             stopAtFirstError: true
         });
         if (errors.length) {
             throw new ResponseValidateException(errors);
         }
-        return this.getNativeResponseValue(responseMetadata, newData);
+        return this.getNativeResponseValue(responseMetadata, data);
     }
 
     private getNativeResponseValue(

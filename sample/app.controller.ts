@@ -32,8 +32,8 @@ export class AppController {
     @Get('multiple')
     @ResponseModel(UserResponse, true)
     @HttpCode(HttpStatus.OK)
-    getMultiple(): UserResponse[] {
-        return [{ name: 'test' }, { name: 'test2' }];
+    getMultiple(): any[] {
+        return [{ name: 'test' }, { name: 'test2', abc: 'xyz' }];
     }
 
     @Get('pagination')
