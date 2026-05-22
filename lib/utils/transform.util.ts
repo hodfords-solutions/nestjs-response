@@ -66,7 +66,7 @@ export function applyTransforms<T extends object>(
     if (!storage) {
         return data;
     }
-    const plan = getOrBuildPlan(target, storage, new Set());
+    const plan = getOrBuildPlan(target, storage);
     if (!plan.propertyTransforms.length && !plan.nestedPlans.length) {
         return data;
     }
@@ -140,29 +140,22 @@ function matchesVersion(metaOptions: TransformOptions | undefined, callOptions: 
     return (since === undefined || version >= since) && (until === undefined || version < until);
 }
 
-function getOrBuildPlan(target: Function, storage: MetadataStorage, visiting: Set<Function>): TransformPlan {
+function getOrBuildPlan(target: Function, storage: MetadataStorage): TransformPlan {
     const cached = planCache.get(target);
     if (cached) {
         return cached;
     }
-    if (visiting.has(target)) {
-        return { propertyTransforms: [], nestedPlans: [] };
-    }
-    visiting.add(target);
+    const plan: TransformPlan = { propertyTransforms: [], nestedPlans: [] };
+    planCache.set(target, plan);
 
-    const propertyTransforms: PropertyTransform[] = [];
-    const nestedPlans: NestedPlan[] = [];
     const seenTransform = new Set<string>();
     const seenNested = new Set<string>();
 
     for (const cls of collectClassChain(target)) {
-        collectPropertyTransforms(cls, storage, seenTransform, propertyTransforms);
-        collectNestedPlans(cls, storage, visiting, seenNested, nestedPlans);
+        collectPropertyTransforms(cls, storage, seenTransform, plan.propertyTransforms);
+        collectNestedPlans(cls, storage, seenNested, plan.nestedPlans);
     }
 
-    const plan: TransformPlan = { propertyTransforms, nestedPlans };
-    visiting.delete(target);
-    planCache.set(target, plan);
     return plan;
 }
 
@@ -194,13 +187,7 @@ function collectPropertyTransforms(
     }
 }
 
-function collectNestedPlans(
-    cls: Function,
-    storage: MetadataStorage,
-    visiting: Set<Function>,
-    seen: Set<string>,
-    out: NestedPlan[]
-): void {
+function collectNestedPlans(cls: Function, storage: MetadataStorage, seen: Set<string>, out: NestedPlan[]): void {
     const typeMap = storage._typeMetadatas.get(cls);
     if (!typeMap) {
         return;
@@ -214,10 +201,8 @@ function collectNestedPlans(
         if (!nestedClass) {
             continue;
         }
-        const nestedPlan = getOrBuildPlan(nestedClass, storage, visiting);
-        if (nestedPlan.propertyTransforms.length > 0 || nestedPlan.nestedPlans.length > 0) {
-            out.push({ propertyName, plan: nestedPlan });
-        }
+        const nestedPlan = getOrBuildPlan(nestedClass, storage);
+        out.push({ propertyName, plan: nestedPlan });
     }
 }
 
