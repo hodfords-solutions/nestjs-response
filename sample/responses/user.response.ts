@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
@@ -19,4 +19,10 @@ export class UserResponse {
         return object.value?.toUpperCase();
     })
     extra?: string;
+}
+
+export class AdminResponse {
+    @ApiProperty()
+    @IsBoolean()
+    isAdmin: boolean;
 }

@@ -208,7 +208,7 @@ export class ResponseInterceptor implements NestInterceptor {
         if (errors.length) {
             throw new ResponseValidateException(errors);
         }
-        return this.getNativeResponseValue(responseMetadata, data);
+        return this.getNativeResponseValue(responseMetadata, responseMap);
     }
 
     private getNativeResponseValue(

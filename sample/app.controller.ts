@@ -1,9 +1,10 @@
 import { Controller, Get, HttpCode, HttpStatus, Param } from '@nestjs/common';
 import { UseResponseInterceptor, ResponseModel } from 'lib';
-import { UserResponse } from './responses/user.response';
+import { AdminResponse, UserResponse } from './responses/user.response';
 import { UserPaginationResponse } from './responses/user-pagination.response';
 import { ResponseModels } from '../lib/decorators/response-models.decorator';
 import { PaginationResponse } from './responses/pagination.response';
+import { plainToInstance } from 'class-transformer';
 
 @Controller()
 @UseResponseInterceptor()
@@ -13,6 +14,13 @@ export class AppController {
     @HttpCode(HttpStatus.OK)
     getSingle(): { name: string } {
         return { name: 'test' };
+    }
+
+    @Get('admin')
+    @ResponseModel(AdminResponse)
+    @HttpCode(HttpStatus.OK)
+    getAdmin(): any {
+        return plainToInstance(AdminResponse, {});
     }
 
     @Get('exclude')
@@ -53,6 +61,12 @@ export class AppController {
     @ResponseModel(Boolean, false)
     getBoolean(): boolean {
         return false;
+    }
+
+    @Get('boolean-null')
+    @ResponseModel(Boolean, false)
+    getBooleanNull(): boolean {
+        return;
     }
 
     @Get('list-boolean')
