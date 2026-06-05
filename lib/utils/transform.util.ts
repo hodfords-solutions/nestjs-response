@@ -66,6 +66,9 @@ export function applyTransforms<T extends object>(
     if (!storage) {
         return data;
     }
+    if (typeof target !== 'function') {
+        return data;
+    }
     const plan = getOrBuildPlan(target, storage, new Set());
     if (!plan.propertyTransforms.length && !plan.nestedPlans.length) {
         return data;
@@ -227,7 +230,8 @@ function resolveNestedClass(meta: TypeMetadataEntry): Function | undefined {
         return undefined;
     }
     try {
-        return typeFn();
+        const resolved = typeFn();
+        return typeof resolved === 'function' ? resolved : undefined;
     } catch {
         return undefined;
     }
