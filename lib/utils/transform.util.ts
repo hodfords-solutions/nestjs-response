@@ -69,7 +69,7 @@ export function applyTransforms<T extends object>(
     if (typeof target !== 'function') {
         return data;
     }
-    const plan = getOrBuildPlan(target, storage, new Set());
+    const plan = getOrBuildPlan(target, storage, new Map());
     if (!plan.propertyTransforms.length && !plan.nestedPlans.length) {
         return data;
     }
@@ -143,28 +143,39 @@ function matchesVersion(metaOptions: TransformOptions | undefined, callOptions: 
     return (since === undefined || version >= since) && (until === undefined || version < until);
 }
 
-function getOrBuildPlan(target: Function, storage: MetadataStorage, visiting: Set<Function>): TransformPlan {
+function getOrBuildPlan(
+    target: Function,
+    storage: MetadataStorage,
+    building: Map<Function, TransformPlan>
+): TransformPlan {
     const cached = planCache.get(target);
     if (cached) {
         return cached;
     }
-    if (visiting.has(target)) {
-        return { propertyTransforms: [], nestedPlans: [] };
+    /**
+     * A class that is still mid-build is part of a reference cycle (self-referential
+     * types such as `referencedMessage?: MessageResponse`, or A -> B -> A). Return the
+     * same in-progress plan object so the caller links to it by identity; it gets fully
+     * populated by the time the build unwinds, and runtime recursion is bounded by the
+     * actual data depth — not the (cyclic) class graph.
+     */
+    const inProgress = building.get(target);
+    if (inProgress) {
+        return inProgress;
     }
-    visiting.add(target);
 
-    const propertyTransforms: PropertyTransform[] = [];
-    const nestedPlans: NestedPlan[] = [];
+    const plan: TransformPlan = { propertyTransforms: [], nestedPlans: [] };
+    building.set(target, plan);
+
     const seenTransform = new Set<string>();
     const seenNested = new Set<string>();
 
     for (const cls of collectClassChain(target)) {
-        collectPropertyTransforms(cls, storage, seenTransform, propertyTransforms);
-        collectNestedPlans(cls, storage, visiting, seenNested, nestedPlans);
+        collectPropertyTransforms(cls, storage, seenTransform, plan.propertyTransforms);
+        collectNestedPlans(cls, storage, building, seenNested, plan.nestedPlans);
     }
 
-    const plan: TransformPlan = { propertyTransforms, nestedPlans };
-    visiting.delete(target);
+    building.delete(target);
     planCache.set(target, plan);
     return plan;
 }
@@ -200,7 +211,7 @@ function collectPropertyTransforms(
 function collectNestedPlans(
     cls: Function,
     storage: MetadataStorage,
-    visiting: Set<Function>,
+    building: Map<Function, TransformPlan>,
     seen: Set<string>,
     out: NestedPlan[]
 ): void {
@@ -217,8 +228,14 @@ function collectNestedPlans(
         if (!nestedClass) {
             continue;
         }
-        const nestedPlan = getOrBuildPlan(nestedClass, storage, visiting);
-        if (nestedPlan.propertyTransforms.length > 0 || nestedPlan.nestedPlans.length > 0) {
+        /**
+         * A cyclic reference resolves to a still-empty in-progress plan, so it can't be
+         * pruned by the emptiness check below — it would drop transforms that get added
+         * later as the build unwinds. Link it unconditionally; identity keeps it in sync.
+         */
+        const isCycle = building.has(nestedClass) && !planCache.has(nestedClass);
+        const nestedPlan = getOrBuildPlan(nestedClass, storage, building);
+        if (isCycle || nestedPlan.propertyTransforms.length > 0 || nestedPlan.nestedPlans.length > 0) {
             out.push({ propertyName, plan: nestedPlan });
         }
     }
