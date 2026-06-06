@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { Expose, Transform, Type } from 'class-transformer';
 import { applyTransforms } from './transform.util';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const ToUnix = (): PropertyDecorator =>
     Transform(({ value }) => (value instanceof Date ? Math.floor(value.getTime() / 1000) : value));
 
