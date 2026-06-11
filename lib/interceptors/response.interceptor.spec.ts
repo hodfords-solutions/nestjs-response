@@ -6,15 +6,15 @@ import { Allow, IsOptional, ValidateNested } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { ResponseInterceptor } from './response.interceptor';
 import { RESPONSE_METADATA_KEY } from '../constants/metadata.constant';
-import { ResponseModel } from '../decorators/response-model.decorator';
 
 /**
  * Minimal stand-in for `@AnyType()` from `@hodfords/nestjs-grpc-helper`: serializes
  * arbitrary JS values into a JSON string on the gRPC outgoing path (`__sendData`),
  * and parses them back on the gRPC incoming path (`__getData`).
  */
-function AnyTypeStub(): PropertyDecorator {
-    return Transform(({ value, options }) => {
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const AnyTypeStub = (): PropertyDecorator =>
+    Transform(({ value, options }) => {
         if (options.groups?.includes('__sendData')) {
             return JSON.stringify(value);
         }
@@ -28,7 +28,6 @@ function AnyTypeStub(): PropertyDecorator {
         }
         return value;
     });
-}
 
 class NestedDetailResponse {
     @Allow()
