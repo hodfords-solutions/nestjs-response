@@ -153,9 +153,17 @@ export class ResponseInterceptor implements NestInterceptor {
             return this.handleNativeValueResponse(responseMetadata, data);
         }
 
-        // Validate first so we see the original payload — applying `__sendData` first
-        // would JSON.stringify nullable nested fields (e.g. `null` → `"null"`) and break
-        // downstream `@ValidateNested` / `@IsOptional` checks.
+        // Apply only @Transform decorators in-place — skips full plainToInstance for performance.
+        // The gRPC outgoing path adds the `__sendData` / `__grpc` groups so `@AnyType()`
+        // JSON.stringify's its value for the proto `string` field in the same walk.
+        // The null guard inside `@AnyType()` (nestjs-grpc-helper >= 11.3.7) keeps nullable
+        // `@ValidateNested` + `@IsOptional` fields working even though validation runs
+        // *after* the transform.
+        const isGrpc = grpcMetadataClass && context.switchToRpc().getContext() instanceof grpcMetadataClass;
+        const groups = isGrpc ? ['__getData', '__sendData', '__grpc'] : ['__getData'];
+        applyTransforms(data, responseMetadata.responseClass, { groups });
+
+        // use validatePlainSync to increase performance, because we only need to validate the plain object, not transform it to class instance
         const errors = validatePlainSync(data, responseMetadata.responseClass, {
             whitelist: true,
             stopAtFirstError: true
@@ -163,17 +171,6 @@ export class ResponseInterceptor implements NestInterceptor {
         if (errors.length) {
             throw new ResponseValidateException(errors);
         }
-
-        // Then run transforms with the group that matches the *outgoing* wire format:
-        //   - gRPC: `__sendData` so `@AnyType` JSON.stringify's array/object values into
-        //     proto `string` fields (otherwise protobuf coerces via `String([...])`
-        //     and the receiver sees `"[object Object],[object Object]"`).
-        //   - HTTP: no group — values pass through and Express/Nest JSON-serializes
-        //     the whole response.
-        const isGrpc = grpcMetadataClass && context.switchToRpc().getContext() instanceof grpcMetadataClass;
-        const groups = isGrpc ? ['__sendData', '__grpc'] : [];
-        applyTransforms(data, responseMetadata.responseClass, { groups });
-
         return data;
     }
 
