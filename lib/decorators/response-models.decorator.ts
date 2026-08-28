@@ -1,7 +1,7 @@
-import { ResponseClass } from '../types/response-metadata.type';
+import { ResponseClass } from '../types/response-metadata.type.js';
 import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiExtraModels, ApiOkResponse, refs } from '@nestjs/swagger';
-import { RESPONSE_METADATA_KEYS } from '../constants/metadata.constant';
+import { RESPONSE_METADATA_KEYS } from '../constants/metadata.constant.js';
 
 export function ResponseModels(...responseClasses: ResponseClass[]): MethodDecorator {
     const metadatas = responseClasses.map((metadata) => {

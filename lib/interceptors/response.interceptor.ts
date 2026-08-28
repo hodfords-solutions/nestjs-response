@@ -1,24 +1,24 @@
 import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
+import { createRequire } from 'node:module';
 import { isBoolean, validatePlainSync } from 'class-validator';
-import { NESTJS_RESPONSE_CONFIG_OPTIONS } from 'lib/constants/provider-key.constant';
-import { ConfigOption } from 'lib/types/config-option.type';
+import { NESTJS_RESPONSE_CONFIG_OPTIONS } from '../constants/provider-key.constant.js';
+import { ConfigOption } from '../types/config-option.type.js';
 import { Observable, map } from 'rxjs';
-import { RESPONSE_METADATA_KEY, RESPONSE_METADATA_KEYS } from '../constants/metadata.constant';
-import { ResponseValidateException } from '../exceptions/response-validate.exception';
-import { NativeValueResponse } from '../responses/native-value.response';
-import { HandleResult } from '../types/handle-result.type';
-import { ResponseMetadata } from '../types/response-metadata.type';
-import { NativeClassResponseNamesConstant } from '../constants/native-class-response-names.constant';
+import { RESPONSE_METADATA_KEY, RESPONSE_METADATA_KEYS } from '../constants/metadata.constant.js';
+import { ResponseValidateException } from '../exceptions/response-validate.exception.js';
+import { NativeValueResponse } from '../responses/native-value.response.js';
+import { HandleResult } from '../types/handle-result.type.js';
+import { ResponseMetadata } from '../types/response-metadata.type.js';
+import { NativeClassResponseNamesConstant } from '../constants/native-class-response-names.constant.js';
 import { ModuleRef } from '@nestjs/core';
-import { NativeResponseValueType } from '../types/native-response-value.type';
-import { applyTransforms } from '../utils/transform.util';
+import { NativeResponseValueType } from '../types/native-response-value.type.js';
+import { applyTransforms } from '../utils/transform.util.js';
 
 let grpcMetadataClass = null;
 
 try {
     // Check project is using grpc
-    // eslint-disable-next-line
-    const grpc = require('@grpc/grpc-js');
+    const grpc = createRequire(import.meta.url)('@grpc/grpc-js');
     grpcMetadataClass = grpc.Metadata;
 } catch (ex) {
     console.log(ex?.message);

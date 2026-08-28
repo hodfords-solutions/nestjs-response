@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import { ClassConstructor, ClassTransformOptions, TransformFnParams, TransformOptions } from 'class-transformer';
+import { createRequire } from 'node:module';
 
 type TransformFn = (params: TransformFnParams) => unknown;
 
@@ -43,12 +44,11 @@ function getMetadataStorage(): MetadataStorage | null {
     if (metadataStorage !== null) {
         return metadataStorage;
     }
+    const require = createRequire(import.meta.url);
     try {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
         metadataStorage = require('class-transformer/cjs/storage').defaultMetadataStorage;
     } catch {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-require-imports
             metadataStorage = require('class-transformer/storage').defaultMetadataStorage;
         } catch {
             metadataStorage = null;

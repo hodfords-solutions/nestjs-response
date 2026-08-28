@@ -8,6 +8,17 @@ Nestjs-Response is a simple yet powerful library for managing API responses in a
 
 ## Installation 🤖
 
+> **Requirements**
+>
+> - This package is **ESM-only** (`"type": "module"`). Import it with `import`, not `require()`.
+> - Node.js `>=20.19.0` (or `>=22.12`, `>=24.15`, `>=26`).
+> - NestJS 12.
+
+| `@hodfords/nestjs-response` | NestJS  | Module format |
+| --------------------------- | ------- | ------------- |
+| `12.x`                      | `12.x`  | ESM           |
+| `11.x`                      | `11.x`  | CommonJS      |
+
 To begin using it, we first install the required dependencies.
 
 ```

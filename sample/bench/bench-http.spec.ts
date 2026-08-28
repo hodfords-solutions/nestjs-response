@@ -1,9 +1,10 @@
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { BenchModule } from './bench.module';
-import { BENCH_SCENARIOS } from './bench.controller';
-import { countNodes, makeAttachments, makeBoardColumns, makeGroupBoardColumns } from './responses/board.fixtures';
+import { BenchModule } from './bench.module.js';
+import { BENCH_SCENARIOS } from './bench.controller.js';
+import { countNodes, makeAttachments, makeBoardColumns, makeGroupBoardColumns } from './responses/board.fixtures.js';
 
 type Stats = { mean: number; p50: number; p95: number };
 

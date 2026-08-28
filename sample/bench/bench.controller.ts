@@ -1,7 +1,7 @@
 import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
-import { ResponseModel, UseResponseInterceptor } from 'lib';
-import { AttachmentResponse, BoardColumnResponse, GroupBoardColumnResponse } from './responses/board.responses';
-import { makeAttachments, makeBoardColumns, makeGroupBoardColumns } from './responses/board.fixtures';
+import { ResponseModel, UseResponseInterceptor } from '../../lib/index.js';
+import { AttachmentResponse, BoardColumnResponse, GroupBoardColumnResponse } from './responses/board.responses.js';
+import { makeAttachments, makeBoardColumns, makeGroupBoardColumns } from './responses/board.fixtures.js';
 
 export const BENCH_SCENARIOS = {
     largeFlat: { attachments: 5000 },
