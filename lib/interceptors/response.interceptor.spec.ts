@@ -1,11 +1,12 @@
+import { describe, expect, it } from 'vitest';
 import 'reflect-metadata';
 import { ExecutionContext } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { Metadata } from '@grpc/grpc-js';
 import { Allow, IsOptional, ValidateNested } from 'class-validator';
 import { plainToInstance, Transform, Type } from 'class-transformer';
-import { ResponseInterceptor } from './response.interceptor';
-import { RESPONSE_METADATA_KEY } from '../constants/metadata.constant';
+import { ResponseInterceptor } from './response.interceptor.js';
+import { RESPONSE_METADATA_KEY } from '../constants/metadata.constant.js';
 
 /**
  * Minimal stand-in for `@AnyType()` from `@hodfords/nestjs-grpc-helper@>=11.3.7`:

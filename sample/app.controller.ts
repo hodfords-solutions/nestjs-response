@@ -1,9 +1,9 @@
 import { Controller, Get, HttpCode, HttpStatus, Param } from '@nestjs/common';
-import { UseResponseInterceptor, ResponseModel } from 'lib';
-import { AdminResponse, UserResponse } from './responses/user.response';
-import { UserPaginationResponse } from './responses/user-pagination.response';
-import { ResponseModels } from '../lib/decorators/response-models.decorator';
-import { PaginationResponse } from './responses/pagination.response';
+import { UseResponseInterceptor, ResponseModel } from '../lib/index.js';
+import { AdminResponse, UserResponse } from './responses/user.response.js';
+import { UserPaginationResponse } from './responses/user-pagination.response.js';
+import { ResponseModels } from '../lib/decorators/response-models.decorator.js';
+import { PaginationResponse } from './responses/pagination.response.js';
 import { plainToInstance } from 'class-transformer';
 
 @Controller()

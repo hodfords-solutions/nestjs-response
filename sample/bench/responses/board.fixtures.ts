@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { FileType, FileUploadStatus, Priority, TaskType } from './board.responses';
+import { FileType, FileUploadStatus, Priority, TaskType } from './board.responses.js';
 
 export function makeAttachment(): unknown {
     return {

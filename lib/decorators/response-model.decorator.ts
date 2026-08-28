@@ -1,7 +1,7 @@
 import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiResponse } from '@nestjs/swagger';
 import { ClassConstructor } from 'class-transformer';
-import { RESPONSE_METADATA_KEY } from '../constants/metadata.constant';
+import { RESPONSE_METADATA_KEY } from '../constants/metadata.constant.js';
 
 export function ResponseModel(
     responseClass: ClassConstructor<object>,

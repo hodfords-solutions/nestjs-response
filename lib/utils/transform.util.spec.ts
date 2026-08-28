@@ -1,6 +1,7 @@
+import { describe, expect, it } from 'vitest';
 import 'reflect-metadata';
 import { Expose, Transform, Type } from 'class-transformer';
-import { applyTransforms } from './transform.util';
+import { applyTransforms } from './transform.util.js';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const ToUnix = (): PropertyDecorator =>
