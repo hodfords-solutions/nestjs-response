@@ -1,6 +1,6 @@
 import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
 import { createRequire } from 'node:module';
-import { isBoolean, validatePlainSync } from 'class-validator';
+import { ValidationError, isBoolean, validatePlainSync } from 'class-validator';
 import { NESTJS_RESPONSE_CONFIG_OPTIONS } from '../constants/provider-key.constant.js';
 import { ConfigOption } from '../types/config-option.type.js';
 import { Observable, map } from 'rxjs';
@@ -21,7 +21,7 @@ try {
     const grpc = createRequire(import.meta.url)('@grpc/grpc-js');
     grpcMetadataClass = grpc.Metadata;
 } catch (ex) {
-    console.log(ex?.message);
+    console.log(ex instanceof Error ? ex.message : ex);
 }
 
 @Injectable()
@@ -135,7 +135,8 @@ export class ResponseInterceptor implements NestInterceptor {
 
                 results.push({ data: result, error: null });
             } catch (error) {
-                const newError = error.errors ? error.errors : error;
+                const { errors } = (error ?? {}) as { errors?: ValidationError[] };
+                const newError = errors ? errors : (error as Partial<ValidationError>);
                 results.push({ data: null, error: newError });
             }
         }
