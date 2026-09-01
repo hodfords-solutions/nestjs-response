@@ -9,5 +9,5 @@
         "npmjs"
     ],
     "flagWords": ["hte"],
-    "ignorePaths": ["node_modules", "*.spec.ts", "*.e2e-spec.ts", "cspell.json", "dist"]
+    "ignorePaths": ["node_modules", "*.spec.ts", "*.e2e-spec.ts", "cspell.json", "dist", "package-lock.json", "pnpm-lock.yaml", "pnpm-workspace.yaml"]
 }
